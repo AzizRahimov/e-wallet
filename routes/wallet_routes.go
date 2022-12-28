@@ -16,8 +16,8 @@ func NewWalletControllerRoute(walletController controllers.WalletController) *Wa
 
 func (r *WalletRouteController) WalletRoute(rg *gin.RouterGroup) {
 
-	//router.POST("/top_up", controller.TopUp)
 	//router.POST("/check_account", controller.CheckAccount)
 	//router.POST("/trn_history", controller.TrnHistory)
 	rg.POST("/get_balance", r.walletRouteController.GetBalance)
+	rg.POST("/top_up", r.walletRouteController.TopUp)
 }

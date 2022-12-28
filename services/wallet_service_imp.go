@@ -19,7 +19,6 @@ func (s *WalletServiceImp) GetBalance(userID int) (wallet models.Wallet, err err
 
 }
 
-func (s *WalletServiceImp) TopUp(wallet models.Wallet) (models.Transaction, error) {
-	//TODO implement me
-	panic("implement me")
+func (s *WalletServiceImp) TopUp(topUp models.TopUp) (trn models.Transaction, err error) {
+	return s.repo.TopUp(topUp)
 }

@@ -7,6 +7,6 @@ type Transaction struct {
 	From      string    `json:"from"`
 	To        string    `json:"to"`
 	Status    string    `json:"status"`
-	TransType string    `json:"trans_type"`
+	Amount    float64   `json:"amount"`
 	CreatedAt time.Time `json:"created_at"`
 }
