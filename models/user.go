@@ -1,9 +1,9 @@
 package models
 
 type User struct {
-	ID    int    `json:"id"`
-	FIO   string `json:"fio"`
-	Age   int    `json:"age"`
-	Login string `json:"login"`
-	Pin   string `json:"pin"`
+	ID    int    `json:"id,omitempty"`
+	FIO   string `json:"fio,omitempty"`
+	Age   int    `json:"age,omitempty"`
+	Phone string `json:"phone,omitempty"`
+	Pin   string `json:"pin,omitempty"`
 }

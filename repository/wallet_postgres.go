@@ -1,8 +1,8 @@
-package services
+package repository
 
 import "github.com/AzizRahimov/e-wallet/models"
 
-type WalletService interface {
+type WalletRepository interface {
 	//CheckAccount()
 	TopUp(wallet models.Wallet) (models.Transaction, error)
 	//TrnHistory()

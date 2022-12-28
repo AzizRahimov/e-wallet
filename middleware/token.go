@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"log"
 	"time"
@@ -10,6 +11,7 @@ import (
 var jwtKey = []byte("supersecretkey")
 
 func ExtractClaims(tokenStr string) (jwt.MapClaims, bool) {
+
 	hmacSecretString := jwtKey
 	hmacSecret := []byte(hmacSecretString)
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {

@@ -1,21 +1,23 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/AzizRahimov/e-wallet/controllers"
+	"github.com/gin-gonic/gin"
+)
 
 type WalletRouteController struct {
-	walletRouteController controllers.WalletRouteController
+	walletRouteController controllers.WalletController
 }
 
-func NewWalletControllerRoute(walletController controllers.WalletRouteController) WalletRouteController {
-	return WalletRouteController{walletController}
+func NewWalletControllerRoute(walletController controllers.WalletController) *WalletRouteController {
+	return &WalletRouteController{walletController}
 
 }
 
 func (r *WalletRouteController) WalletRoute(rg *gin.RouterGroup) {
-	router := rg.Group("/wallet")
 
-	router.POST("/check_account", controller.CheckAccount)
-	router.POST("/top_up", controller.TopUp)
-	router.POST("/trn_history", controller.TrnHistory)
-	router.POST("/get_balance", controller.GetBalance)
+	//router.POST("/top_up", controller.TopUp)
+	//router.POST("/check_account", controller.CheckAccount)
+	//router.POST("/trn_history", controller.TrnHistory)
+	rg.POST("/get_balance", r.walletRouteController.GetBalance)
 }
