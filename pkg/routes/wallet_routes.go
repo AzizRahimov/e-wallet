@@ -19,4 +19,5 @@ func (r *WalletRouteController) WalletRoute(rg *gin.RouterGroup) {
 	rg.POST("/get_balance", r.walletRouteController.GetBalance)
 	rg.POST("/top_up", r.walletRouteController.TopUp)
 	rg.POST("/total_history", r.walletRouteController.TotalHistoryTrn)
+	rg.POST("/check_account", r.walletRouteController.CheckAccount)
 }

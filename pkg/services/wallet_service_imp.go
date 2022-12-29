@@ -21,6 +21,11 @@ func (s *WalletServiceImp) GetBalance(userID int) (wallet models.Wallet, err err
 
 }
 
+func (s *WalletServiceImp) CheckAccount(userID int) (wallet models.Wallet, err error) {
+	return s.repo.CheckAccount(userID)
+
+}
+
 func (s *WalletServiceImp) TopUp(topUp models.TopUp) (trn models.Transaction, err error) {
 	return s.repo.TopUp(topUp)
 }

@@ -176,3 +176,16 @@ func (r *WalletPostgresImp) GetPhone(userID int) (user models.User, err error) {
 	return user, nil
 
 }
+
+func (r *WalletPostgresImp) CheckAccount(userID int) (wallet models.Wallet, err error) {
+	query := fmt.Sprintf("SELECT id, user_id, account, balance, is_identified FROM %q WHERE user_id = $1", "wallet")
+	err = r.db.Raw(query, userID).Scan(&wallet).Error
+	if wallet.ID == 0 {
+		return models.Wallet{}, errors.New("account not found")
+	}
+	if err != nil {
+		return models.Wallet{}, err
+	}
+
+	return wallet, nil
+}

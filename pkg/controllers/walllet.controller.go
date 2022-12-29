@@ -44,6 +44,32 @@ func (h *WalletController) GetBalance(c *gin.Context) {
 
 }
 
+func (h *WalletController) CheckAccount(c *gin.Context) {
+	userID, err := getUserId(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+		return
+	}
+	userIdStr := strconv.Itoa(userID)
+
+	hash := c.GetHeader("X-Digest")
+
+	checkHash := utils.GetSha1(userIdStr, []byte(utils.AppSettings.SecretKey.Key))
+
+	if checkHash != hash {
+		c.JSON(http.StatusBadRequest, gin.H{"reason": "Invalid hash"})
+		return
+	}
+
+	account, err := h.walletService.CheckAccount(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"account": account})
+
+}
+
 func (h *WalletController) TopUp(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
