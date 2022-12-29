@@ -16,6 +16,7 @@ func NewAuthPostgres(db *gorm.DB) *AuthPostgres {
 	return &AuthPostgres{db: db}
 }
 
+// GetUser - берет номер телефона и пин для авторизации
 func (p *AuthPostgres) GetUser(phone string, pin string) (user models.User, err error) {
 	query := fmt.Sprintf("SELECT id, phone FROM %q WHERE phone=$1 AND pin=$2", "users")
 
@@ -30,6 +31,7 @@ func (p *AuthPostgres) GetUser(phone string, pin string) (user models.User, err 
 	return user, nil
 }
 
+// SingUp - процесс регистрации юзера
 func (p *AuthPostgres) SingUp(user models.User) error {
 	err := p.db.Create(&user).Error
 	if err != nil {

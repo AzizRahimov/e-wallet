@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+// StartDbConnection - connect to db
 func StartDbConnection() *gorm.DB {
 	settingParams := utils.AppSettings.PostgresParams
 

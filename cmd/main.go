@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	utils.ReadSettings()
-	dbConnection := db.StartDbConnection()
-	routes.RunServerAndRoutes(dbConnection)
+	utils.ReadSettings()                    // read config from file
+	dbConnection := db.StartDbConnection()  // connect to db
+	routes.RunServerAndRoutes(dbConnection) // run server and routes
 }

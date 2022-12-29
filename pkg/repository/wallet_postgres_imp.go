@@ -23,6 +23,7 @@ func NewWalletPostgres(db *gorm.DB) *WalletPostgresImp {
 	return &WalletPostgresImp{db: db}
 }
 
+// GetBalance - берет данные кошелька по юзер ID
 func (r *WalletPostgresImp) GetBalance(userID int) (wallet models.Wallet, err error) {
 	query := fmt.Sprintf("SELECT id, user_id, balance, is_identified FROM %q WHERE user_id = $1", "wallet")
 	err = r.db.Raw(query, userID).Scan(&wallet).Error
@@ -38,6 +39,7 @@ func (r *WalletPostgresImp) GetBalance(userID int) (wallet models.Wallet, err er
 
 }
 
+// TopUp - Пополнение электронного кошелька
 func (r *WalletPostgresImp) TopUp(topUp models.TopUp) (trn models.Transaction, err error) {
 	// check senderWallet
 	senderWallet, err := r.GetBalance(topUp.ClientID)
@@ -110,6 +112,7 @@ func (r *WalletPostgresImp) TopUp(topUp models.TopUp) (trn models.Transaction, e
 
 }
 
+// GetWalletByPhoneNumber - берет данные кошелька по номеру
 func (r *WalletPostgresImp) GetWalletByPhoneNumber(phone string) (wallet models.Wallet, err error) {
 	query := fmt.Sprintf("SELECT w.id, w.user_id, w.balance, w.is_identified from %q w    join %q u on u.id = w.user_id WHERE  u.phone = $1", "wallet", "users")
 
@@ -122,6 +125,7 @@ func (r *WalletPostgresImp) GetWalletByPhoneNumber(phone string) (wallet models.
 
 }
 
+// AddTransaction - создает транзакцию
 func (r *WalletPostgresImp) AddTransaction(db *gorm.DB, transaction models.Transaction) (models.Transaction, error) {
 	err := db.Omit("total_amount, month, operation").Create(&transaction).Error
 
@@ -133,6 +137,7 @@ func (r *WalletPostgresImp) AddTransaction(db *gorm.DB, transaction models.Trans
 
 }
 
+// GetUserByID GetUserBYID - берет данные юзера по ID
 func (r *WalletPostgresImp) GetUserByID(userID int) (user models.User, err error) {
 	query := fmt.Sprintf("SELECT  id, fio, age, phone FROM %q WHERE id = $1", "users")
 
@@ -148,6 +153,7 @@ func (r *WalletPostgresImp) GetUserByID(userID int) (user models.User, err error
 
 }
 
+// GetTotalTopUpPerMonth - получает все операции за тек месяц
 func (r *WalletPostgresImp) GetTotalTopUpPerMonth(phone string, data string) (trn []models.Transaction, err error) {
 	query := fmt.Sprintf("select id, from_phone, to_phone, status, amount, created_at, trn_type from %q  where to_phone = $1 AND created_at >= $2 AND trn_type = $3", "transactions")
 
@@ -163,6 +169,7 @@ func (r *WalletPostgresImp) GetTotalTopUpPerMonth(phone string, data string) (tr
 	return trn, nil
 }
 
+// GetPhone - берет номер телефона по ID юзера
 func (r *WalletPostgresImp) GetPhone(userID int) (user models.User, err error) {
 	query := fmt.Sprintf("SELECT id, phone FROM %q WHERE id = $1", "users")
 	err = r.db.Raw(query, userID).Scan(&user).Error
@@ -177,6 +184,7 @@ func (r *WalletPostgresImp) GetPhone(userID int) (user models.User, err error) {
 
 }
 
+//CheckAccount - проверка на сущ аккаунта
 func (r *WalletPostgresImp) CheckAccount(userID int) (wallet models.Wallet, err error) {
 	query := fmt.Sprintf("SELECT id, user_id, account, balance, is_identified FROM %q WHERE user_id = $1", "wallet")
 	err = r.db.Raw(query, userID).Scan(&wallet).Error

@@ -21,20 +21,24 @@ func (s *WalletServiceImp) GetBalance(userID int) (wallet models.Wallet, err err
 
 }
 
+//CheckAccount - проверка на сущ аккаунта
 func (s *WalletServiceImp) CheckAccount(userID int) (wallet models.Wallet, err error) {
 	return s.repo.CheckAccount(userID)
 
 }
 
+// TopUp - Пополнение электронного кошелька
 func (s *WalletServiceImp) TopUp(topUp models.TopUp) (trn models.Transaction, err error) {
 	return s.repo.TopUp(topUp)
 }
 
+// GetPhone - берет данные юзера по ID
 func (s *WalletServiceImp) GetPhone(userID int) (user models.User, err error) {
 	return s.repo.GetPhone(userID)
 
 }
 
+// TotalTrn - высчитывает общую сумму и кол-во операции определенного кошелька
 func (s *WalletServiceImp) TotalTrn(userID int) (models.Transaction, error) {
 	currentData := time.Now().AddDate(0, 0, -time.Now().Day()+1)
 	currentDataStr := currentData.Format("2006-01-02")
