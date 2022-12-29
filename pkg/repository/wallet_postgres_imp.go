@@ -154,10 +154,10 @@ func (r *WalletPostgresImp) GetUserByID(userID int) (user models.User, err error
 }
 
 // GetTotalTopUpPerMonth - получает все операции за тек месяц
-func (r *WalletPostgresImp) GetTotalTopUpPerMonth(phone string, data string) (trn []models.Transaction, err error) {
-	query := fmt.Sprintf("select id, from_phone, to_phone, status, amount, created_at, trn_type from %q  where to_phone = $1 AND created_at >= $2 AND trn_type = $3", "transactions")
+func (r *WalletPostgresImp) GetTotalTopUpPerMonth(phone string, firstDayMonth string, lastDayMonth string) (trn []models.Transaction, err error) {
+	query := fmt.Sprintf("select id, from_phone, to_phone, status, amount, created_at, trn_type from %q  where to_phone = $1 AND created_at >= $2 AND created_at <= $3 AND trn_type = $4", "transactions")
 
-	err = r.db.Raw(query, phone, data, replenishment).Scan(&trn).Error
+	err = r.db.Raw(query, phone, firstDayMonth, lastDayMonth, replenishment).Scan(&trn).Error
 	if len(trn) == 0 {
 		return trn, nil
 

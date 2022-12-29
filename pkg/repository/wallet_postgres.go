@@ -13,5 +13,5 @@ type WalletRepository interface {
 	AddTransaction(db *gorm.DB, transaction models.Transaction) (models.Transaction, error)
 	GetUserByID(userID int) (user models.User, err error)
 	GetPhone(userID int) (user models.User, err error)
-	GetTotalTopUpPerMonth(phone string, data string) (trn []models.Transaction, err error)
+	GetTotalTopUpPerMonth(phone string, firstDayMonth string, lastDayMonth string) (trn []models.Transaction, err error)
 }
