@@ -20,4 +20,6 @@ func (r *WalletRouteController) WalletRoute(rg *gin.RouterGroup) {
 	//router.POST("/trn_history", controller.TrnHistory)
 	rg.POST("/get_balance", r.walletRouteController.GetBalance)
 	rg.POST("/top_up", r.walletRouteController.TopUp)
+	rg.POST("/history", r.walletRouteController.GetTopUpPerMonth)
+	rg.POST("/total_history", r.walletRouteController.TotalHistoryTrn)
 }

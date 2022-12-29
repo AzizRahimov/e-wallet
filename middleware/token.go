@@ -76,7 +76,7 @@ func Auth() gin.HandlerFunc {
 }
 
 func ValidateToken(signedToken string) (err error) {
-	// вот эту часть я не понял
+
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&JWTClaim{},

@@ -37,6 +37,7 @@ func (r *WalletPostgresImp) TopUp(topUp models.TopUp) (trn models.Transaction, e
 	if err != nil {
 		return trn, err
 	}
+
 	senderUser, err := r.GetUserByID(topUp.ClientID)
 	if err != nil {
 		return trn, err
@@ -65,11 +66,11 @@ func (r *WalletPostgresImp) TopUp(topUp models.TopUp) (trn models.Transaction, e
 	err = tx.Table("wallet").Omit("account").Save(&senderWallet).Error
 	if err != nil {
 		transaction, err := r.AddTransaction(r.db, models.Transaction{
-			From:      senderUser.Phone,
-			To:        topUp.ReceiverPhone,
+			FromPhone: senderUser.Phone,
+			ToPhone:   topUp.ReceiverPhone,
 			Status:    "неуспешно",
 			Amount:    topUp.Balance,
-			CreatedAt: time.Time{},
+			CreatedAt: time.Now(),
 		})
 		tx.Rollback()
 		return transaction, err
@@ -82,16 +83,25 @@ func (r *WalletPostgresImp) TopUp(topUp models.TopUp) (trn models.Transaction, e
 		return trn, err
 	}
 
-	transaction, err := r.AddTransaction(tx, models.Transaction{
-		From:      senderUser.Phone,
-		To:        topUp.ReceiverPhone,
-		Status:    "успешный",
+	transactionSender, err := r.AddTransaction(tx, models.Transaction{
+		FromPhone: senderUser.Phone,
+		ToPhone:   topUp.ReceiverPhone,
+		Status:    "успешно",
+		TrnType:   "вычитывание",
 		Amount:    topUp.Balance,
-		CreatedAt: time.Time{},
+		CreatedAt: time.Now(),
+	})
+	_, err = r.AddTransaction(tx, models.Transaction{
+		FromPhone: senderUser.Phone,
+		ToPhone:   topUp.ReceiverPhone,
+		Status:    "успешно",
+		TrnType:   "пополнение",
+		Amount:    topUp.Balance,
+		CreatedAt: time.Now(),
 	})
 	tx.Commit()
 
-	return transaction, nil
+	return transactionSender, nil
 
 }
 
@@ -108,7 +118,8 @@ func (r *WalletPostgresImp) GetWalletByPhoneNumber(phone string) (wallet models.
 }
 
 func (r *WalletPostgresImp) AddTransaction(db *gorm.DB, transaction models.Transaction) (models.Transaction, error) {
-	err := db.Create(&transaction).Error
+	err := db.Omit("total_amount, month, operation").Create(&transaction).Error
+
 	if err != nil {
 		return models.Transaction{}, err
 	}
@@ -124,6 +135,36 @@ func (r *WalletPostgresImp) GetUserByID(userID int) (user models.User, err error
 	if user.ID == 0 {
 		return models.User{}, errors.New("user not found")
 	}
+	if err != nil {
+		return models.User{}, err
+	}
+
+	return user, nil
+
+}
+
+func (r *WalletPostgresImp) GetTotalTopUpPerMonth(phone string, data string) (trn []models.Transaction, err error) {
+	//TODO: нужно взять данные за тек месяц
+	//
+	//query := fmt.Sprintf("select id, from_phone, to_phone, status, amount, created_at from transactions cc where cc.created_at >= '2022-12-01'")
+	query := fmt.Sprintf("select id, from_phone, to_phone, status, amount, created_at, trn_type from %q  where to_phone = $1 AND created_at >= $2 AND trn_type = $3", "transactions")
+	fmt.Println(query, "query")
+	fmt.Println(r.db.Raw(query, phone, data, "пополнение"))
+	err = r.db.Raw(query, phone, data, "пополнение").Scan(&trn).Error
+	if len(trn) == 0 {
+		return trn, nil
+
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return trn, nil
+}
+
+func (r *WalletPostgresImp) GetPhone(userID int) (user models.User, err error) {
+	query := fmt.Sprintf("SELECT phone FROM %q WHERE id = $1", "users")
+	err = r.db.Raw(query, userID).Scan(&user).Error
 	if err != nil {
 		return models.User{}, err
 	}

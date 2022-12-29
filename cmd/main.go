@@ -32,20 +32,6 @@ func execute() {
 		log.Fatal(err, "DATABSE")
 	}
 
-	//db, err := sql.Open("postgres", connStr)
-	//if err != nil {
-	//	log.Fatal(err)
-	//	return
-	//}
-	//defer func() {
-	//	if cerr := db.Close(); cerr != nil {
-	//		if err == nil {
-	//			log.Fatal(err)
-	//			return
-	//		}
-	//
-	//	}
-	//}()
 	authRep := repository.NewAuthPostgres(db)
 	authService := services.NewAuthService(authRep)
 	authController := controllers.NewAuthController(authService)

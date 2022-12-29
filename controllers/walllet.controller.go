@@ -1,13 +1,11 @@
 package controllers
 
 import (
-	"crypto/hmac"
-	"crypto/sha1"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/AzizRahimov/e-wallet/models"
 	"github.com/AzizRahimov/e-wallet/services"
+	"github.com/AzizRahimov/e-wallet/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -51,7 +49,7 @@ func (h *WalletController) TopUp(c *gin.Context) {
 
 	marshal, err := json.Marshal(&topUp)
 	fmt.Println(string(marshal))
-	checkHash := GetSha1(string(marshal), []byte("secret"))
+	checkHash := utils.GetSha1(string(marshal), []byte("secret"))
 	fmt.Println(checkHash)
 
 	if checkHash != hash {
@@ -69,16 +67,18 @@ func (h *WalletController) TopUp(c *gin.Context) {
 
 }
 
-func GetSha1(text string, secret []byte) string {
+func (h *WalletController) TotalHistoryTrn(c *gin.Context) {
+	userId, err := getUserId(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+		return
+	}
+	trn, err := h.walletService.TotalTrn(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+		return
+	}
 
-	// Create a new HMAC by defining the hash type and the key (as byte array)
-	h := hmac.New(sha1.New, secret)
+	c.JSON(http.StatusOK, trn)
 
-	// Write Data to it
-	h.Write([]byte(text))
-
-	// Get result and encode as hexadecimal string
-	hash := hex.EncodeToString(h.Sum(nil))
-
-	return hash
 }
