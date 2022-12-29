@@ -40,7 +40,6 @@ func (s *WalletServiceImp) GetPhone(userID int) (user models.User, err error) {
 
 // TotalTrn - высчитывает общую сумму и кол-во операции определенного кошелька
 func (s *WalletServiceImp) TotalTrn(userID int) (models.Transaction, error) {
-	//currentData := time.Now().AddDate(0, 0, -time.Now().Day()+1)
 	now := time.Now()
 	currentYear, currentMonth, _ := now.Date()
 	currentLocation := now.Location()
@@ -50,8 +49,6 @@ func (s *WalletServiceImp) TotalTrn(userID int) (models.Transaction, error) {
 
 	firstDayOfMonthStr := firstDayOfMonth.Format("2006-01-02")
 	lastDayOfMonthStr := lastDayOfMonth.Format("2006-01-02")
-
-	//currentDataStr := currentData.Format("2006-01-02")
 
 	userPhone, err := s.GetPhone(userID)
 	if err != nil {
