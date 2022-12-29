@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/AzizRahimov/e-wallet/models"
-	"github.com/AzizRahimov/e-wallet/services"
+	"github.com/AzizRahimov/e-wallet/pkg/services"
 	"github.com/AzizRahimov/e-wallet/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 type WalletController struct {
@@ -21,9 +21,20 @@ func NewWalletController(walletService services.WalletService) WalletController 
 func (h *WalletController) GetBalance(c *gin.Context) {
 	userID, err := getUserId(c)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 		return
 	}
-	fmt.Println("ID", userID)
+	userIdStr := strconv.Itoa(userID)
+
+	hash := c.GetHeader("X-Digest")
+
+	checkHash := utils.GetSha1(userIdStr, []byte(utils.AppSettings.SecretKey.Key))
+
+	if checkHash != hash {
+		c.JSON(http.StatusBadRequest, gin.H{"reason": "Invalid hash"})
+		return
+	}
+
 	balance, err := h.walletService.GetBalance(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
@@ -48,9 +59,8 @@ func (h *WalletController) TopUp(c *gin.Context) {
 	}
 
 	marshal, err := json.Marshal(&topUp)
-	fmt.Println(string(marshal))
-	checkHash := utils.GetSha1(string(marshal), []byte("secret"))
-	fmt.Println(checkHash)
+
+	checkHash := utils.GetSha1(string(marshal), []byte(utils.AppSettings.SecretKey.Key))
 
 	if checkHash != hash {
 		c.JSON(http.StatusBadRequest, gin.H{"reason": "Invalid hash"})
@@ -71,6 +81,16 @@ func (h *WalletController) TotalHistoryTrn(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+		return
+	}
+	userIdStr := strconv.Itoa(userId)
+
+	hash := c.GetHeader("X-Digest")
+
+	checkHash := utils.GetSha1(userIdStr, []byte(utils.AppSettings.SecretKey.Key))
+
+	if checkHash != hash {
+		c.JSON(http.StatusBadRequest, gin.H{"reason": "Invalid hash"})
 		return
 	}
 	trn, err := h.walletService.TotalTrn(userId)

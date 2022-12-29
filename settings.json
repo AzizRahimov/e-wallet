@@ -1,0 +1,24 @@
+{
+  "app": {
+    "server_name": "localhost",
+    "port_run": ":8000",
+    "server_url": "127.0.0.1"
+
+  },
+  "postgres_params": {
+    "server": "localhost",
+    "port": 5432,
+    "user": "app",
+    "password": "pass",
+    "database": "db"
+  },
+  "secretKey": {
+    "key": "secret"
+  },
+
+  "auth": {
+    "salt": "dkaskdsa21312das3das",
+    "signing_key": "quiche#SKDJASDKA3dsa213#sH"
+
+  }
+}

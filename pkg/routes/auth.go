@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/AzizRahimov/e-wallet/controllers"
+	"github.com/AzizRahimov/e-wallet/pkg/controllers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +16,6 @@ func NewAuthControllerRoute(authController controllers.AuthController) *AuthRout
 
 func (rc *AuthRouteController) AuthRoute(rg *gin.RouterGroup) {
 	router := rg.Group("/auth")
-	//router.POST("/register", rc.authController.SignUpUser)
 	router.POST("/sing-up", rc.authRouteController.CreateUser)
 	router.POST("/sing-in", rc.authRouteController.SingIn)
 

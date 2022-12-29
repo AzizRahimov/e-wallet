@@ -9,8 +9,7 @@ import (
 
 const (
 	authorizationHeader = "Authorization"
-	userCtx             = "userId"
-	XUserId             = "X-UserId"
+	xUserId             = "X-UserId"
 )
 
 //userIdentity - Берем ID юзера из Header authorizationHeader - и записываем в контекст
@@ -34,13 +33,13 @@ func (h *AuthController) UserIdentity(c *gin.Context) {
 		return
 	}
 
-	c.Set(userCtx, userId)
+	c.Set(xUserId, userId)
 
 }
 
 // getUserId -- получение ID пользователя  из контекста
 func getUserId(c *gin.Context) (int, error) {
-	id, ok := c.Get(userCtx)
+	id, ok := c.Get(xUserId)
 	if !ok {
 		newErrorResponse(c, http.StatusBadRequest, "user id not found")
 		return 0, errors.New("user id not found")

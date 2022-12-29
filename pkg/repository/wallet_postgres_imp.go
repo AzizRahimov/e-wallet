@@ -8,6 +8,13 @@ import (
 	"time"
 )
 
+const (
+	replenishment  = "пополнение"
+	subtraction    = "вычитывание"
+	unsuccessfully = "неуспешно"
+	successfully   = "успешно"
+)
+
 type WalletPostgresImp struct {
 	db *gorm.DB
 }
@@ -22,7 +29,7 @@ func (r *WalletPostgresImp) GetBalance(userID int) (wallet models.Wallet, err er
 	if err != nil {
 		return wallet, err
 	}
-	fmt.Println("wallet.UserID", wallet.UserID)
+
 	if wallet.UserID == 0 {
 		return wallet, errors.New("account not found")
 	}
@@ -43,40 +50,38 @@ func (r *WalletPostgresImp) TopUp(topUp models.TopUp) (trn models.Transaction, e
 		return trn, err
 	}
 
-	if senderWallet.Balance < topUp.Balance {
-		return trn, errors.New("insufficient funds")
+	if senderWallet.Balance < topUp.Amount {
+		return trn, errors.New("недостаточно средст на счете")
 	}
-
-	// check account
 
 	receiverWallet, err := r.GetWalletByPhoneNumber(topUp.ReceiverPhone)
 	if err != nil {
 		return trn, err
 	}
 
-	if receiverWallet.IsIdentified && receiverWallet.Balance+topUp.Balance > 100000 {
+	if receiverWallet.IsIdentified && receiverWallet.Balance+topUp.Amount > 100000 {
 		return trn, errors.New("баланс не может превышать сумму на 100 тыс")
 
-	} else if !receiverWallet.IsIdentified && receiverWallet.Balance+topUp.Balance > 10000 {
-		return trn, errors.New("баланс не может превышать сумму на 10 тыс")
+	} else if !receiverWallet.IsIdentified && receiverWallet.Balance+topUp.Amount > 10000 {
+		return trn, errors.New("для не идентифицированного баланс не может превышать сумму на 10 тыс")
 
 	}
 	tx := r.db.Begin()
-	senderWallet.Balance -= topUp.Balance
+	senderWallet.Balance -= topUp.Amount
 	err = tx.Table("wallet").Omit("account").Save(&senderWallet).Error
 	if err != nil {
 		transaction, err := r.AddTransaction(r.db, models.Transaction{
 			FromPhone: senderUser.Phone,
 			ToPhone:   topUp.ReceiverPhone,
-			Status:    "неуспешно",
-			Amount:    topUp.Balance,
+			Status:    unsuccessfully,
+			Amount:    topUp.Amount,
 			CreatedAt: time.Now(),
 		})
 		tx.Rollback()
 		return transaction, err
 	}
 
-	receiverWallet.Balance += topUp.Balance
+	receiverWallet.Balance += topUp.Amount
 	err = tx.Table("wallet").Omit("account").Save(&receiverWallet).Error
 	if err != nil {
 		tx.Rollback()
@@ -86,17 +91,17 @@ func (r *WalletPostgresImp) TopUp(topUp models.TopUp) (trn models.Transaction, e
 	transactionSender, err := r.AddTransaction(tx, models.Transaction{
 		FromPhone: senderUser.Phone,
 		ToPhone:   topUp.ReceiverPhone,
-		Status:    "успешно",
-		TrnType:   "вычитывание",
-		Amount:    topUp.Balance,
+		Status:    successfully,
+		TrnType:   subtraction,
+		Amount:    topUp.Amount,
 		CreatedAt: time.Now(),
 	})
 	_, err = r.AddTransaction(tx, models.Transaction{
 		FromPhone: senderUser.Phone,
 		ToPhone:   topUp.ReceiverPhone,
-		Status:    "успешно",
-		TrnType:   "пополнение",
-		Amount:    topUp.Balance,
+		Status:    successfully,
+		TrnType:   replenishment,
+		Amount:    topUp.Amount,
 		CreatedAt: time.Now(),
 	})
 	tx.Commit()
@@ -144,13 +149,9 @@ func (r *WalletPostgresImp) GetUserByID(userID int) (user models.User, err error
 }
 
 func (r *WalletPostgresImp) GetTotalTopUpPerMonth(phone string, data string) (trn []models.Transaction, err error) {
-	//TODO: нужно взять данные за тек месяц
-	//
-	//query := fmt.Sprintf("select id, from_phone, to_phone, status, amount, created_at from transactions cc where cc.created_at >= '2022-12-01'")
 	query := fmt.Sprintf("select id, from_phone, to_phone, status, amount, created_at, trn_type from %q  where to_phone = $1 AND created_at >= $2 AND trn_type = $3", "transactions")
-	fmt.Println(query, "query")
-	fmt.Println(r.db.Raw(query, phone, data, "пополнение"))
-	err = r.db.Raw(query, phone, data, "пополнение").Scan(&trn).Error
+
+	err = r.db.Raw(query, phone, data, replenishment).Scan(&trn).Error
 	if len(trn) == 0 {
 		return trn, nil
 
@@ -163,8 +164,11 @@ func (r *WalletPostgresImp) GetTotalTopUpPerMonth(phone string, data string) (tr
 }
 
 func (r *WalletPostgresImp) GetPhone(userID int) (user models.User, err error) {
-	query := fmt.Sprintf("SELECT phone FROM %q WHERE id = $1", "users")
+	query := fmt.Sprintf("SELECT id, phone FROM %q WHERE id = $1", "users")
 	err = r.db.Raw(query, userID).Scan(&user).Error
+	if user.ID == 0 {
+		return models.User{}, errors.New("user not found")
+	}
 	if err != nil {
 		return models.User{}, err
 	}

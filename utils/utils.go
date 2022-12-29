@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+//GetSha1 - генерация хеша
 func GetSha1(text string, secret []byte) string {
 
 	// Create a new HMAC by defining the hash type and the key (as byte array)
@@ -24,15 +25,15 @@ func GetSha1(text string, secret []byte) string {
 	return hash
 }
 
-func WriteWithMutex(trn []models.Transaction) float64 {
+// CalculateAmount - подсчет общей суммы с помощью горутин
+func CalculateAmount(trn []models.Transaction) float64 {
 	start := time.Now()
-	//total := []int{10, 10, 10, 20, 50, 20, 50, 30}
+
 	var counter float64
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	wg.Add(len(trn))
 
-	//for i := 0; i < 10; i++ {
 	for _, value := range trn {
 
 		value := value.Amount
@@ -40,8 +41,7 @@ func WriteWithMutex(trn []models.Transaction) float64 {
 			defer wg.Done()
 
 			mu.Lock()
-			//! в данном участке кода мы может быть уверены, что работает только 1 горутина
-			//! далее после того как мы внесли какие-то изменения мы разблокируем
+
 			counter += value
 			mu.Unlock()
 
@@ -50,7 +50,7 @@ func WriteWithMutex(trn []models.Transaction) float64 {
 	}
 
 	wg.Wait()
-	fmt.Println(counter)
+
 	fmt.Println(time.Now().Sub(start).Seconds())
 	return counter
 }

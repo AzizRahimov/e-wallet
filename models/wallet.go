@@ -9,7 +9,8 @@ type Wallet struct {
 }
 
 type TopUp struct {
-	ClientID      int     `json:"client_id,omitempty"`
-	ReceiverPhone string  `json:"receiver_phone"`
-	Balance       float64 `json:"balance"`
+	ClientID      int    `json:"client_id,omitempty"`
+	ReceiverPhone string `json:"receiver_phone"`
+
+	Amount float64 `json:"amount,omitempty"`
 }

@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"github.com/AzizRahimov/e-wallet/models"
-	"github.com/AzizRahimov/e-wallet/services"
+	"github.com/AzizRahimov/e-wallet/pkg/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -16,7 +16,7 @@ func NewAuthController(authService services.AuthService) AuthController {
 }
 
 func (h *AuthController) CreateUser(c *gin.Context) {
-	var user *models.User
+	var user models.User
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
 
@@ -31,7 +31,7 @@ func (h *AuthController) CreateUser(c *gin.Context) {
 }
 
 func (h *AuthController) SingIn(c *gin.Context) {
-	var input *models.User
+	var input models.User
 
 	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": err.Error()})

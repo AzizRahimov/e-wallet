@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/AzizRahimov/e-wallet/models"
-	"github.com/AzizRahimov/e-wallet/repository"
+	"github.com/AzizRahimov/e-wallet/pkg/repository"
 	"github.com/AzizRahimov/e-wallet/utils"
 	"time"
 )
@@ -30,17 +30,6 @@ func (s *WalletServiceImp) GetPhone(userID int) (user models.User, err error) {
 
 }
 
-func (s *WalletServiceImp) GetTopUpPerMonth(userID int) (trn []models.Transaction, err error) {
-	currentData := time.Now().AddDate(0, 0, -time.Now().Day()+1)
-	currentDataStr := currentData.Format("2006-01-02")
-	userPhone, err := s.GetPhone(userID)
-	if err != nil {
-
-	}
-	return s.repo.GetTopUpPerMonth(userPhone.Phone, currentDataStr)
-
-}
-
 func (s *WalletServiceImp) TotalTrn(userID int) (models.Transaction, error) {
 	currentData := time.Now().AddDate(0, 0, -time.Now().Day()+1)
 	currentDataStr := currentData.Format("2006-01-02")
@@ -51,7 +40,7 @@ func (s *WalletServiceImp) TotalTrn(userID int) (models.Transaction, error) {
 	}
 	totalHistoryTrnCurrentMonth, err := s.repo.GetTotalTopUpPerMonth(userPhone.Phone, currentDataStr)
 
-	total := utils.WriteWithMutex(totalHistoryTrnCurrentMonth)
+	total := utils.CalculateAmount(totalHistoryTrnCurrentMonth)
 	trn := models.Transaction{
 		TotalAmount: total,
 		Operation:   len(totalHistoryTrnCurrentMonth),
